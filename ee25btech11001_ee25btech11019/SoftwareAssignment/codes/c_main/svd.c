@@ -446,24 +446,24 @@ void compute_svd(double** A, int m, int n, int k, const char* basename){
 
     //grayscale bana do
     unsigned char *apna_image = malloc(m * n);
-    double pixelmin = 1e9, pixelmax = -1e9;
+    double chhota = 1e9, bada = -1e9;
 
     // find min and max val a pixel can hld
     for (int i = 0; i < m; i++) {
         for (int j = 0; j < n; j++) {
             double v = finalA[i][j];
-            if (v < pixelmin) pixelmin = v;
-            if (v > pixelmax) pixelmax = v;
+            if (v < chhota) chhota = v;
+            if (v > bada) bada = v;
         }
     }
 
-    if (pixelmax - pixelmin < zero)
-        pixelmax = pixelmin + 1.0;
+    if (bada - chhota < zero)
+        bada = chhota + 1.0;
 
     // normalize to 0–255
     for (int i = 0; i < m; i++) {
         for (int j = 0; j < n; j++) {
-            double val = (finalA[i][j] - pixelmin) * 255.0 / (pixelmax - pixelmin);
+            double val = (finalA[i][j] - chhota) * 255.0 / (bada - chhota);
             apna_image[i * n + j] = (unsigned char)(val + 0.5);
         }
     }
@@ -501,28 +501,28 @@ void compute_svd(double** A, int m, int n, int k, const char* basename){
 
 void compute_svd_rgb(double*** A_rgb, int m, int n, int k, const char* basename) {
     const char* RGB[3] = {"_R", "_G", "_B"};
-    char temp_names[3][300];
+    char clrname[3][300];
     //created seperate grayscale for every color
-    for (int c = 0; c < 3; c++) {
-        snprintf(temp_names[c], sizeof(temp_names[c]), "%s%s", basename, RGB[c]);
+    for (int c = 0; c < 3; c++){
+        snprintf(clrname[c], sizeof(clrname[c]), "%s%s", basename, RGB[c]);
         printf("\n--- Compressing %s channel ---\n", RGB[c]);
-        compute_svd(A_rgb[c], m, n, k, temp_names[c]);
+        compute_svd(A_rgb[c], m, n, k, clrname[c]);
     }
     //merged those seperate grayscales
-    double*** comp_rgb = (double***)malloc(3 * sizeof(double**));
-    for (int c = 0; c < 3; c++) {
+    double*** comp_rgb= (double***)malloc(3 * sizeof(double**));
+    for (int c  =0; c <3; c++){
         char path[300];
-        snprintf(path, sizeof(path), "../../figs/%s%s.pgm", basename, RGB[c]);
-        int w, h;
+        snprintf(path, sizeof(path), "../../figs/%s%s.pgm",basename,   RGB[c]);
+        int w,h;
         comp_rgb[c] = padh(path, &w, &h);
     }
 
     //save rgb
-    likh_rgb(basename, comp_rgb, n, m);
+    likh_rgb(basename, comp_rgb,n, m);
 
     // cleanup
-    for (int c = 0; c < 3; c++) {
-        for (int i = 0; i < m; i++)
+    for (int c = 0;   c < 3; c++) {
+        for (int i= 0; i < m; i++)
             free(comp_rgb[c][i]);
         free(comp_rgb[c]);
     }
